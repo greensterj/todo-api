@@ -24,12 +24,17 @@ app.get('/todos', function(req, res) {
         filteredTodos = _.where(filteredTodos, {completed: false});
     }
 
+    if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0) {
+        filteredTodos = _.filter(filteredTodos, function(todo) {
+            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+        })
+    }
     res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function (req, res) {
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId})
+    var matchedTodo = _.findWhere(todos, {id: todoId});
     if (matchedTodo) res.json(matchedTodo);
     else res.status('404').send();
 });
