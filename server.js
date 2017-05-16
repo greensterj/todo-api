@@ -25,11 +25,11 @@ app.get('/todos', function (req, res) {
     }
     if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0) {
         where.description = {
-            $like: '%'+queryParams.q+'%'
+            $like: '%' + queryParams.q + '%'
         };
     }
 
-    db.todo.findAll({where: where}).then(function(todos) {
+    db.todo.findAll({where: where}).then(function (todos) {
         res.json(todos);
     }, function (e) {
         res.status(500).send();
@@ -53,12 +53,12 @@ app.get('/todos', function (req, res) {
 
 app.get('/todos/:id', function (req, res) {
     var todoId = parseInt(req.params.id, 10);
-    db.todo.findById(todoId).then(function(todo) {
-       if (!!todo) {
-           res.json(todo.toJSON());
-       } else {
-           res.status(404).send();
-       }
+    db.todo.findById(todoId).then(function (todo) {
+        if (!!todo) {
+            res.json(todo.toJSON());
+        } else {
+            res.status(404).send();
+        }
     }, function (e) {
         res.status(500).send();
     });
