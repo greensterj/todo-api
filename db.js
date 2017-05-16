@@ -1,7 +1,7 @@
 /**
  * Created by faridjafaroff on 5/16/17.
  */
-var Sequelize = require('Sequelize');
+var Sequelize = require('sequelize');
 var env = process.env.NODE_ENV || 'development';
 var sequelize;
 
