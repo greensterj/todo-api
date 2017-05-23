@@ -5,7 +5,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     _ = require('underscore'),
     db = require('./db.js'),
-    bcrypt = require('bcryptjs');
+    bcrypt = require('bcryptjs'),
+    middleware = require('./middleware.js')(db);
 
 var app = express(), PORT = process.env.PORT || 3000;
 var todos = [], todoNextId = 1;
@@ -16,7 +17,7 @@ app.get('/', function (req, res) {
     res.send('Todo API Root');
 });
 
-app.get('/todos', function (req, res) {
+app.get('/todos', middleware.requireAuthentication, function (req, res) {
     var queryParams = req.query;
     var where = {};
     if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
@@ -52,7 +53,7 @@ app.get('/todos', function (req, res) {
     // res.json(filteredTodos);
 });
 
-app.get('/todos/:id', function (req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function (req, res) {
     var todoId = parseInt(req.params.id, 10);
     db.todo.findById(todoId).then(function (todo) {
         if (!!todo) {
@@ -68,7 +69,7 @@ app.get('/todos/:id', function (req, res) {
     // else res.status('404').send();
 });
 
-app.post('/todos/', function (req, res) {
+app.post('/todos/', middleware.requireAuthentication, function (req, res) {
     var body = _.pick(req.body, 'description', 'completed');
 
     db.todo.create(body).then(function (todo) {
@@ -87,7 +88,7 @@ app.post('/todos/', function (req, res) {
     // res.json(body);
 });
 
-app.delete('/todos/:id', function (req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, function (req, res) {
     var todoId = parseInt(req.params.id, 10);
 
     db.todo.destroy({
@@ -115,7 +116,7 @@ app.delete('/todos/:id', function (req, res) {
     // }
 });
 
-app.put('/todos/:id', function (req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function (req, res) {
     var todoId = parseInt(req.params.id, 10);
     // var matchedTodo = _.findWhere(todos, {id: todoId});
     var body = _.pick(req.body, 'description', 'completed');
@@ -188,7 +189,7 @@ app.post('/users/login', function (req, res) {
 
 });
 
-db.sequelize.sync({ force: true }).then(function () {
+db.sequelize.sync().then(function () {
     app.listen(PORT, function () {
         console.log('Express listening on port ' + PORT + '!');
     });
