@@ -4,7 +4,8 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     _ = require('underscore'),
-    db = require('./db.js');
+    db = require('./db.js'),
+    bcrypt = require('bcryptjs');
 
 var app = express(), PORT = process.env.PORT || 3000;
 var todos = [], todoNextId = 1;
@@ -161,7 +162,28 @@ app.put('/todos/:id', function (req, res) {
     // _.extend(matchedTodo, validAttributes);
 });
 
-db.sequelize.sync().then(function () {
+app.post('/users', function (req, res) {
+    var body = _.pick(req.body, 'email', 'password');
+
+    db.user.create(body).then(function(user) {
+        res.json(user.toPublicJSON());
+    }, function (e) {
+        res.status(400).json(e);
+    });
+});
+
+app.post('/users/login', function (req, res) {
+    var body = _.pick(req.body, 'email', 'password');
+
+    db.user.authenticate(body).then(function (user) {
+        res.json(user.toPublicJSON());
+    }, function () {
+        res.status(401).send();
+    });
+
+});
+
+db.sequelize.sync({ force: true }).then(function () {
     app.listen(PORT, function () {
         console.log('Express listening on port ' + PORT + '!');
     });
